@@ -3,8 +3,7 @@ import os
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # На уровень выше myproject
-
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -13,15 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent  # На уровень 
 SECRET_KEY = 'django-insecure-axio5*0te-ia!_$&692kg66*!==t@2-d&d#+44%7h8v3()da3c'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') + [
-    '.railway.app',
-    'localhost',
-    '127.0.0.1',
-    '0.0.0.0'
-]
+ALLOWED_HOSTS = ['*']  # Для начала разрешим все хосты
 
 ALLOWED_HOSTS = []
 
