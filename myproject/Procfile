@@ -1,0 +1,1 @@
+web: cd myproject && python manage.py migrate && gunicorn myproject.wsgi --workers 3
