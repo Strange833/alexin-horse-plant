@@ -1,0 +1,2 @@
+web: python manage.py migrate && gunicorn horse_plant.wsgi --log-file -
+release: python manage.py migrate

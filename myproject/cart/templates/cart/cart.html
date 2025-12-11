@@ -39,6 +39,123 @@
         margin-top: 2rem;
     }
     
+    /* Улучшения для полей ввода */
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: #fff;
+        color: #333;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        background: #f8fdff;
+    }
+    
+    .form-group input:invalid {
+        border-color: #e74c3c;
+    }
+    
+    .form-group input:valid {
+        border-color: #27ae60;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+    }
+    
+    .form-group input::placeholder {
+        color: #95a5a6;
+        opacity: 0.8;
+    }
+    
+    /* Улучшение для радио-кнопок */
+    .delivery-option, .payment-option {
+        padding: 12px 16px;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+        background: #f8f9fa;
+    }
+    
+    .delivery-option:hover, .payment-option:hover {
+        background: #e8f4fd;
+        border-color: #3498db;
+    }
+    
+    .delivery-option input:checked + .delivery-content,
+    .payment-option input:checked + .payment-content {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        border-radius: 8px;
+        padding: 10px;
+    }
+    
+    /* Улучшение промокода */
+    .promo-input-group {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .promo-input-group input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+    
+    .btn-apply-promo {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-apply-promo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+    }
+    
+    /* Улучшение итоговой суммы */
+    .order-total-section {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 1.5rem 0;
+    }
+    
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .total-row:last-child {
+        border-bottom: none;
+    }
+    
+    .final-total {
+        font-size: 1.3rem;
+        padding-top: 15px;
+        margin-top: 10px;
+        border-top: 2px solid #3498db;
+    }
+    
     @media (max-width: 768px) {
         .empty-cart {
             padding: 3rem 1rem;
@@ -47,6 +164,14 @@
         .cart-actions {
             flex-direction: column;
             align-items: center;
+        }
+        
+        .promo-input-group {
+            flex-direction: column;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr !important;
         }
     }
 </style>
@@ -129,19 +254,27 @@
                                 <div class="form-group">
                                     <label for="customer_name">ФИО *</label>
                                     <input type="text" id="customer_name" name="customer_name" 
-                                           value="{{ user.get_full_name }}" required>
+                                           value="{{ user.get_full_name|default:'' }}" 
+                                           placeholder="Иванов Иван Иванович" required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="customer_phone">Телефон *</label>
                                     <input type="tel" id="customer_phone" name="customer_phone" 
-                                           value="{{ user.profile.phone|default:'' }}" required>
+                                           value="{{ user.profile.phone|default:'' }}" 
+                                           placeholder="79001234567" 
+                                           pattern="[0-9]{11}" 
+                                           title="Введите 11 цифр номера телефона" required>
+                                    <small style="color: #7f8c8d; font-size: 12px; margin-top: 5px; display: block;">
+                                        Формат: 11 цифр без пробелов и скобок
+                                    </small>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="customer_email">Email</label>
                                     <input type="email" id="customer_email" name="customer_email" 
-                                           value="{{ user.email }}">
+                                           value="{{ user.email|default:'' }}"
+                                           placeholder="example@mail.ru">
                                 </div>
                             </div>
                         </div>
@@ -152,27 +285,39 @@
                             <div class="form-grid">
                                 <div class="form-group">
                                     <label for="delivery_city">Город *</label>
-                                    <input type="text" id="delivery_city" name="delivery_city" required>
+                                    <input type="text" id="delivery_city" name="delivery_city" 
+                                           value="{{ user.profile.city|default:'' }}"
+                                           placeholder="Москва" required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="delivery_street">Улица *</label>
-                                    <input type="text" id="delivery_street" name="delivery_street" required>
+                                    <input type="text" id="delivery_street" name="delivery_street" 
+                                           value="{{ user.profile.street|default:'' }}"
+                                           placeholder="ул. Ленина" required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="delivery_house">Дом *</label>
-                                    <input type="text" id="delivery_house" name="delivery_house" required>
+                                    <input type="text" id="delivery_house" name="delivery_house" 
+                                           value="{{ user.profile.house|default:'' }}"
+                                           placeholder="д. 15" required>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="delivery_apartment">Квартира/Офис</label>
-                                    <input type="text" id="delivery_apartment" name="delivery_apartment">
+                                    <input type="text" id="delivery_apartment" name="delivery_apartment" 
+                                           value="{{ user.profile.apartment|default:'' }}"
+                                           placeholder="кв. 42">
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="delivery_index">Почтовый индекс</label>
-                                    <input type="text" id="delivery_index" name="delivery_index">
+                                    <input type="text" id="delivery_index" name="delivery_index" 
+                                           value="{{ user.profile.postal_index|default:'' }}"
+                                           placeholder="101000"
+                                           pattern="[0-9]{6}"
+                                           title="6 цифр индекса">
                                 </div>
                             </div>
                         </div>
@@ -268,7 +413,7 @@
                             <div class="promo-section">
                                 <div class="promo-input-group">
                                     <input type="text" id="promo_code" name="promo_code" 
-                                           placeholder="Введите промокод">
+                                           placeholder="Введите промокод (например, LUCKY20)">
                                     <button type="button" class="btn-apply-promo" onclick="applyPromoCode()">
                                         Применить
                                     </button>
@@ -289,10 +434,12 @@
                                 <span id="assemblyCost">{{ assembly_cost }} ₽</span>
                             </div>
                             
+                            {% if discount > 0 %}
                             <div class="total-row discount-row">
                                 <span>Скидка <span id="discountPercent">{{ discount_percentage }}%</span></span>
                                 <span class="discount-value" id="discountAmount">-{{ discount }} ₽</span>
                             </div>
+                            {% endif %}
                             
                             <div class="total-row">
                                 <span>Доставка</span>
@@ -391,6 +538,50 @@
         .catch(error => console.error('Ошибка:', error));
     }
     
+    // Ограничение ввода только цифр для телефона
+    document.getElementById('customer_phone').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^\d]/g, '');
+    });
+    
+    // Ограничение ввода только цифр для почтового индекса
+    document.getElementById('delivery_index').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^\d]/g, '');
+    });
+    
+    // Применение промокода
+    function applyPromoCode() {
+        const promoCode = document.getElementById('promo_code').value.trim();
+        const promoMessage = document.getElementById('promoMessage');
+        
+        if (!promoCode) {
+            promoMessage.innerHTML = '<span style="color: #e74c3c;">Введите промокод</span>';
+            return;
+        }
+        
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('/cart/api/apply-promo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ promo_code: promoCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                promoMessage.innerHTML = `<span style="color: #27ae60;">${data.message}</span>`;
+                updateTotal();
+            } else {
+                promoMessage.innerHTML = `<span style="color: #e74c3c;">${data.message}</span>`;
+            }
+        })
+        .catch(error => {
+            promoMessage.innerHTML = '<span style="color: #e74c3c;">Ошибка при применении промокода</span>';
+        });
+    }
+    
     // Обновление стоимости доставки при выборе способа
     document.querySelectorAll('input[name="delivery_method"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -402,27 +593,21 @@
         const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
         const deliveryCostElement = document.getElementById('deliveryCost');
         
-        fetch('/cart/api/data/')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    let cost = 0;
-                    if (deliveryMethod === 'pickup') {
-                        cost = 0;
-                    } else if (deliveryMethod === 'post') {
-                        cost = 300;
-                    } else {
-                        cost = data.delivery_cost;
-                    }
-                    
-                    deliveryCostElement.textContent = cost + ' ₽';
-                    updateTotal();
-                }
-            });
+        let cost = 0;
+        if (deliveryMethod === 'pickup') {
+            cost = 0;
+        } else if (deliveryMethod === 'post') {
+            cost = 300;
+        } else {
+            cost = 500;
+        }
+        
+        deliveryCostElement.textContent = cost + ' ₽';
+        updateTotal();
     }
     
+    // Функция для обновления итоговой суммы
     function updateTotal() {
-        // Функция для пересчета итоговой суммы
         fetch('/cart/api/data/')
             .then(response => response.json())
             .then(data => {
@@ -431,9 +616,78 @@
                     document.getElementById('discountPercent').textContent = data.discount_percentage + '%';
                     document.getElementById('discountAmount').textContent = '- ' + data.discount + ' ₽';
                     document.getElementById('assemblyCost').textContent = data.assembly_cost + ' ₽';
-                    document.getElementById('totalAmount').textContent = data.total + ' ₽';
+                    
+                    // Обновляем доставку
+                    const deliveryMethod = document.querySelector('input[name="delivery_method"]:checked').value;
+                    let deliveryCost = 0;
+                    if (deliveryMethod === 'pickup') {
+                        deliveryCost = 0;
+                    } else if (deliveryMethod === 'post') {
+                        deliveryCost = 300;
+                    } else {
+                        deliveryCost = 500;
+                    }
+                    
+                    const total = parseFloat(data.total) + deliveryCost - parseFloat(data.delivery_cost || 0);
+                    document.getElementById('totalAmount').textContent = total.toFixed(2) + ' ₽';
                 }
             });
     }
+    
+    // Валидация формы перед отправкой
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        const phoneInput = document.getElementById('customer_phone');
+        const phoneRegex = /^[0-9]{11}$/;
+        
+        if (!phoneRegex.test(phoneInput.value)) {
+            e.preventDefault();
+            alert('Пожалуйста, введите корректный номер телефона (11 цифр)');
+            phoneInput.focus();
+            return false;
+        }
+        
+        const requiredFields = document.querySelectorAll('input[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = '#e74c3c';
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Пожалуйста, заполните все обязательные поля');
+            return false;
+        }
+        
+        // Показываем индикатор загрузки
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        checkoutBtn.innerHTML = 'Обработка...';
+        checkoutBtn.disabled = true;
+    });
+    
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Автоматически заполняем поля из профиля если пустые
+        const userFields = [
+            { id: 'customer_name', value: '{{ user.get_full_name|default:"" }}' },
+            { id: 'customer_email', value: '{{ user.email|default:"" }}' },
+            { id: 'customer_phone', value: '{{ user.profile.phone|default:"" }}' },
+            { id: 'delivery_city', value: '{{ user.profile.city|default:"" }}' },
+            { id: 'delivery_street', value: '{{ user.profile.street|default:"" }}' },
+            { id: 'delivery_house', value: '{{ user.profile.house|default:"" }}' },
+            { id: 'delivery_apartment', value: '{{ user.profile.apartment|default:"" }}' },
+            { id: 'delivery_index', value: '{{ user.profile.postal_index|default:"" }}' }
+        ];
+        
+        userFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element && !element.value && field.value) {
+                element.value = field.value;
+            }
+        });
+    });
 </script>
 {% endblock %}
