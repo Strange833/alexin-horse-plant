@@ -1,0 +1,67 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Бронирование {{ horse.name }} - Алексинский конный завод{% endblock %}
+
+{% block content %}
+<div class="horse-booking-page">
+    <div class="booking-container">
+        <h1>Бронирование лошади {{ horse.name }}</h1>
+        <p>Эта страница устарела. Пожалуйста, используйте новую систему бронирования.</p>
+        
+        <div class="navigation-controls">
+            <button class="btn btn-primary" onclick="window.location.href='{% url 'horses_list' %}'">
+                ← Вернуться к выбору лошади
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.horse-booking-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.booking-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.booking-container h1 {
+    color: #2d5016;
+    margin-bottom: 1rem;
+}
+
+.booking-container p {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+.navigation-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: white;
+}
+</style>
+{% endblock %}

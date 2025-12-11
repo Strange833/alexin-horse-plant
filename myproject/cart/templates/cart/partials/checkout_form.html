@@ -1,0 +1,194 @@
+<!-- Форма оформления заказа -->
+<div class="checkout-section">
+    <h3 class="checkout-title">Оформление заказа</h3>
+    
+    <form id="checkoutForm">
+        {% csrf_token %}
+        
+        <!-- Контактная информация -->
+        <div class="checkout-block">
+            <h4>Контактная информация</h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="customer_name">ФИО *</label>
+                    <input type="text" id="customer_name" required 
+                           placeholder="Иванов Иван Иванович"
+                           value="{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="customer_phone">Телефон *</label>
+                    <input type="tel" id="customer_phone" required 
+                           placeholder="+7 (999) 999-99-99"
+                           value="{% if user.profile.phone %}{{ user.profile.phone }}{% else %}{% endif %}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="customer_email">Email</label>
+                <input type="email" id="customer_email" 
+                       placeholder="your@email.com"
+                       value="{{ user.email }}">
+            </div>
+        </div>
+        
+        <!-- Адрес доставки -->
+        <div class="checkout-block">
+            <h4>Адрес доставки</h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="delivery_city">Город *</label>
+                    <input type="text" id="delivery_city" required 
+                           placeholder="Москва">
+                </div>
+                
+                <div class="form-group">
+                    <label for="delivery_index">Индекс</label>
+                    <input type="text" id="delivery_index" 
+                           placeholder="123456"
+                           maxlength="6">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="delivery_street">Улица *</label>
+                    <input type="text" id="delivery_street" required 
+                           placeholder="ул. Пушкина">
+                </div>
+                
+                <div class="form-group">
+                    <label for="delivery_house">Дом *</label>
+                    <input type="text" id="delivery_house" required 
+                           placeholder="10">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="delivery_apartment">Квартира/Офис</label>
+                    <input type="text" id="delivery_apartment" 
+                           placeholder="25">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Способ доставки -->
+        <div class="checkout-block">
+            <h4>Способ доставки</h4>
+            
+            <div class="delivery-methods">
+                <label class="delivery-option">
+                    <input type="radio" name="delivery_method" value="courier" checked>
+                    <span class="delivery-info">
+                        <strong>Курьерская доставка</strong>
+                        <span class="delivery-price">500 ₽</span>
+                        <span class="delivery-desc">Доставка курьером до двери</span>
+                    </span>
+                </label>
+                
+                <label class="delivery-option">
+                    <input type="radio" name="delivery_method" value="pickup">
+                    <span class="delivery-info">
+                        <strong>Самовывоз</strong>
+                        <span class="delivery-price">0 ₽</span>
+                        <span class="delivery-desc">Забрать самостоятельно</span>
+                    </span>
+                </label>
+                
+                <label class="delivery-option">
+                    <input type="radio" name="delivery_method" value="post">
+                    <span class="delivery-info">
+                        <strong>Почта России</strong>
+                        <span class="delivery-price">300 ₽</span>
+                        <span class="delivery-desc">Доставка почтой</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Способ оплаты -->
+        <div class="checkout-block">
+            <h4>Способ оплаты</h4>
+            
+            <div class="payment-methods">
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="card" checked>
+                    <span class="payment-info">
+                        <strong>Банковская карта</strong>
+                        <span class="payment-icon">💳</span>
+                    </span>
+                </label>
+                
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="sbp">
+                    <span class="payment-info">
+                        <strong>СБП (Система быстрых платежей)</strong>
+                        <span class="payment-icon">📱</span>
+                    </span>
+                </label>
+                
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="applepay">
+                    <span class="payment-info">
+                        <strong>Apple Pay</strong>
+                        <span class="payment-icon">🍎</span>
+                    </span>
+                </label>
+                
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="googlepay">
+                    <span class="payment-info">
+                        <strong>Google Pay</strong>
+                        <span class="payment-icon">📲</span>
+                    </span>
+                </label>
+                
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="cash">
+                    <span class="payment-info">
+                        <strong>Наличные при получении</strong>
+                        <span class="payment-icon">💵</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Примечания -->
+        <div class="checkout-block">
+            <div class="form-group">
+                <label for="order_notes">Примечания к заказу</label>
+                <textarea id="order_notes" rows="3" 
+                          placeholder="Особые пожелания, время доставки и т.д."></textarea>
+            </div>
+        </div>
+        
+        <!-- Промокод -->
+        <div class="checkout-block">
+            <div class="form-group promo-group">
+                <label for="promo_code">Промокод</label>
+                <div class="promo-input">
+                    <input type="text" id="promo_code" placeholder="Введите промокод">
+                    <button type="button" class="btn-promo" id="applyPromo">Применить</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Согласие -->
+        <div class="checkout-block">
+            <label class="agreement">
+                <input type="checkbox" id="agree_terms" required>
+                <span>Я согласен с <a href="#">условиями обработки персональных данных</a> и <a href="#">правилами оказания услуг</a></span>
+            </label>
+        </div>
+        
+        <!-- Кнопка оформления -->
+        <div class="checkout-actions">
+            <button type="submit" class="btn-checkout" id="submitOrderBtn">
+                🚀 Оформить заказ
+            </button>
+        </div>
+    </form>
+</div>

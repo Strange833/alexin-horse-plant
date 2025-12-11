@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}АКЗ - Алексинский конный завод{% endblock %}</title>
+    <!-- ДОБАВИТЬ ЭТУ СТРОКУ -->
+    <!-- CSRF Token для AJAX запросов -->
+    {% csrf_token %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    <!-- Статические файлы -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Чекбокс для управления меню -->
+    <input type="checkbox" id="menuToggle" class="menu-toggle">
+    
+    {% include 'main/partials/header.html' %}
+    
+    <!-- Оверлей для закрытия меню -->
+    <label for="menuToggle" class="menu-overlay" id="menuOverlay"></label>
+    
+    <!-- Основной контент -->
+    <div class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+    <!-- Модальное окно для входа -->
+<div id="authModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10001; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%;">
+        <h3>Войдите в систему</h3>
+        <p>Для добавления товаров в корзину необходимо войти в систему.</p>
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <a href="{% url 'login' %}" style="flex: 1; padding: 0.8rem; background: #4a7c2a; color: white; text-align: center; text-decoration: none; border-radius: 8px;">
+                Войти
+            </a>
+            <button onclick="hideAuthModal()" style="padding: 0.8rem 1.5rem; background: #ccc; border: none; border-radius: 8px; cursor: pointer;">
+                Отмена
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Функции для показа/скрытия модального окна
+function showAuthModal() {
+    document.getElementById('authModal').style.display = 'flex';
+}
+
+function hideAuthModal() {
+    document.getElementById('authModal').style.display = 'none';
+}
+
+// Закрытие по клику на фон
+document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideAuthModal();
+    }
+});
+</script>
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Заказ успешно оформлен - Алексинский конный завод{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+<style>
+    .success-page {
+        padding: 4rem 2rem;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .success-container {
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        background: white;
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .success-icon {
+        font-size: 5rem;
+        color: #27ae60;
+        margin-bottom: 2rem;
+    }
+    
+    .success-title {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin: 0 0 1rem;
+    }
+    
+    .success-subtitle {
+        font-size: 1.2rem;
+        color: #7f8c8d;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .order-details {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 2rem 0;
+        text-align: left;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #ecf0f1;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .detail-value {
+        color: #2c3e50;
+    }
+    
+    .success-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .success-actions .btn-upgrade {
+        flex: 1;
+        padding: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .success-page {
+            padding: 2rem 1rem;
+        }
+        
+        .success-container {
+            padding: 2rem 1.5rem;
+        }
+        
+        .success-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    <div class="success-container">
+        <div class="success-icon">✅</div>
+        
+        <h1 class="success-title">Заказ успешно оформлен!</h1>
+        
+        <p class="success-subtitle">
+            Спасибо за ваш заказ! Мы уже начали его обработку. 
+            В ближайшее время с вами свяжется наш менеджер для подтверждения.
+        </p>
+        
+        <div class="order-details">
+            <div class="detail-row">
+                <span class="detail-label">Номер заказа:</span>
+                <span class="detail-value">{{ order.order_number }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Дата заказа:</span>
+                <span class="detail-value">{{ order.created_at|date:"d.m.Y H:i" }}</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Сумма заказа:</span>
+                <span class="detail-value">{{ order.total }} ₽</span>
+            </div>
+            
+            <div class="detail-row">
+                <span class="detail-label">Статус:</span>
+                <span class="detail-value">{{ order.get_status_display }}</span>
+            </div>
+            
+            {% if order.subscription_savings > 0 %}
+            <div class="detail-row">
+                <span class="detail-label">Экономия по подписке:</span>
+                <span class="detail-value" style="color: #27ae60;">-{{ order.subscription_savings }} ₽</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="success-actions">
+            <button class="btn-upgrade premium" onclick="window.location.href='{% url 'food_list' %}'">
+                🛒 Продолжить покупки
+            </button>
+            <button class="btn-upgrade pro" onclick="window.location.href='{% url 'profile' %}'">
+                📦 К моим заказам
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,690 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ food.name }} - Алексинский конный завод{% endblock %}
+
+{% block extra_css %}
+<style>
+    .food-detail-page {
+        padding: 2rem 0 4rem;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 2rem;
+        color: var(--light-text);
+    }
+    
+    .breadcrumb a {
+        color: var(--secondary-color);
+        text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+    
+    .food-detail-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    @media (max-width: 992px) {
+        .food-detail-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+    
+    .food-images {
+        position: relative;
+    }
+    
+    .main-image {
+        width: 100%;
+        height: 400px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+        margin-bottom: 1rem;
+    }
+    
+    .main-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 1rem;
+    }
+    
+    .main-image .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 5rem;
+        color: #ccc;
+    }
+    
+    .image-thumbnails {
+        display: flex;
+        gap: 0.8rem;
+        overflow-x: auto;
+        padding: 0.5rem;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        background: #f5f5f5;
+    }
+    
+    .thumbnail:hover {
+        border-color: var(--secondary-color);
+    }
+    
+    .thumbnail.active {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    
+    .thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .thumbnail .placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #aaa;
+    }
+    
+    .food-info {
+        padding: 1rem;
+    }
+    
+    .food-category-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .food-title {
+        font-size: 2rem;
+        color: var(--dark-text);
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+    
+    .food-rating {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .rating-stars {
+        color: #f39c12;
+        font-size: 1.3rem;
+    }
+    
+    .rating-count {
+        color: var(--light-text);
+    }
+    
+    .food-description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        font-size: 1.05rem;
+    }
+    
+    .food-specs {
+        background: var(--light-bg);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .specs-title {
+        font-size: 1.2rem;
+        color: var(--dark-text);
+        margin-bottom: 1rem;
+    }
+    
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .specs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .spec-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px dashed var(--border-color);
+    }
+    
+    .spec-item:last-child {
+        border-bottom: none;
+    }
+    
+    .spec-label {
+        color: var(--light-text);
+    }
+    
+    .spec-value {
+        color: var(--dark-text);
+        font-weight: 600;
+    }
+    
+    .price-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .current-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .original-price {
+        font-size: 1.5rem;
+        color: var(--light-text);
+        text-decoration: line-through;
+        margin-bottom: 1rem;
+    }
+    
+    .discount-badge {
+        display: inline-block;
+        background: #e74c3c;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .stock-info {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .stock-in {
+        color: #27ae60;
+    }
+    
+    .stock-low {
+        color: #f39c12;
+    }
+    
+    .stock-out {
+        color: #e74c3c;
+    }
+    
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .quantity-label {
+        font-weight: 600;
+        color: var(--dark-text);
+    }
+    
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        background: var(--secondary-color);
+        color: white;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quantity-btn:hover {
+        background: #2980b9;
+    }
+    
+    .quantity-btn.minus {
+        background: #e74c3c;
+    }
+    
+    .quantity-btn.minus:hover {
+        background: #c0392b;
+    }
+    
+    .quantity-input {
+        width: 60px;
+        height: 40px;
+        border: none;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .quantity-input:focus {
+        outline: none;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .btn-add-cart {
+        flex: 1;
+        padding: 1rem;
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-add-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+    }
+    
+    .btn-buy-now {
+        flex: 1;
+        padding: 1rem;
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-buy-now:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(41, 128, 185, 0.3);
+    }
+    
+    .benefits-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .benefits-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.5rem 0;
+        color: #666;
+    }
+    
+    .benefits-list li::before {
+        content: '✅';
+    }
+    
+    .similar-products {
+        margin-top: 3rem;
+    }
+    
+    .similar-title {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+    
+    .similar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="food-detail-page">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        <div class="breadcrumb">
+            <a href="{% url 'index' %}">Главная</a> › 
+            <a href="{% url 'food_list' %}">Магазин кормов</a> › 
+            {% if food.category %}
+            <a href="{% url 'food_list' %}?category={{ food.category.id }}">{{ food.category.name }}</a> › 
+            {% endif %}
+            <span>{{ food.name }}</span>
+        </div>
+        
+        <!-- Основной контейнер -->
+        <div class="food-detail-container">
+            <!-- Левая колонка: Изображения -->
+            <div class="food-images">
+                <div class="main-image" id="mainImage">
+                    {% if food.image %}
+                    <img src="{{ food.image.url }}" alt="{{ food.name }}" id="currentImage">
+                    {% else %}
+                    <div class="image-placeholder">🥕</div>
+                    {% endif %}
+                </div>
+                
+                <div class="image-thumbnails" id="thumbnails">
+                    {% if food.image %}
+                    <div class="thumbnail active" onclick="changeImage('{{ food.image.url }}')">
+                        <img src="{{ food.image.url }}" alt="{{ food.name }}">
+                    </div>
+                    {% endif %}
+                    <!-- Можно добавить дополнительные изображения -->
+                </div>
+            </div>
+            
+            <!-- Правая колонка: Информация -->
+            <div class="food-info">
+                <!-- Категория -->
+                <div class="food-category-badge">
+                    <span>{{ food.category.icon|default:"🥕" }}</span>
+                    {{ food.category.name|default:"Корма" }}
+                </div>
+                
+                <!-- Название -->
+                <h1 class="food-title">{{ food.name }}</h1>
+                
+                <!-- Рейтинг -->
+                {% if food.rating > 0 %}
+                <div class="food-rating">
+                    <span class="rating-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= food.rating|add:"0.5"|floatformat:0|add:"0" %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="rating-count">{{ food.rating|floatformat:1 }} ({{ food.review_count }} отзывов)</span>
+                </div>
+                {% endif %}
+                
+                <!-- Описание -->
+                <div class="food-description">
+                    {{ food.description|linebreaks }}
+                </div>
+                
+                <!-- Характеристики -->
+                <div class="food-specs">
+                    <h3 class="specs-title">Характеристики</h3>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Вес/объем:</span>
+                            <span class="spec-value">{{ food.weight }} {{ food.get_unit_display }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Ккал на 100г:</span>
+                            <span class="spec-value">{{ food.calories }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Белки:</span>
+                            <span class="spec-value">{{ food.protein }}%</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Жиры:</span>
+                            <span class="spec-value">{{ food.fat }}%</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Клетчатка:</span>
+                            <span class="spec-value">{{ food.fiber }}%</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Минимальный заказ:</span>
+                            <span class="spec-value">{{ food.min_order }} шт.</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Цена и добавление в корзину -->
+                <div class="price-section">
+                    {% if food.get_discount_percentage > 0 %}
+                    <div class="discount-badge">Скидка {{ food.get_discount_percentage }}%</div>
+                    {% endif %}
+                    
+                    <div class="current-price" id="currentPrice">
+                        {% if user.is_authenticated and user_profile %}
+                            {{ user_price|floatformat:2 }} ₽
+                        {% else %}
+                            {{ food.base_price|floatformat:2 }} ₽
+                        {% endif %}
+                    </div>
+                    
+                    {% if food.get_discount_percentage > 0 %}
+                    <div class="original-price">{{ food.base_price|floatformat:2 }} ₽</div>
+                    {% endif %}
+                    
+                    <!-- Наличие -->
+                    <div class="stock-info">
+                        {% if food.is_in_stock %}
+                            {% if food.is_low_stock %}
+                                <span class="stock-low">⚠️ Осталось мало: {{ food.stock }} шт.</span>
+                            {% else %}
+                                <span class="stock-in">✅ В наличии</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="stock-out">❌ Нет в наличии</span>
+                        {% endif %}
+                    </div>
+                    
+                    {% if food.is_in_stock %}
+                    <!-- Управление количеством -->
+                    <div class="quantity-controls">
+                        <span class="quantity-label">Количество:</span>
+                        <div class="quantity-selector">
+                            <button class="quantity-btn minus" onclick="changeQuantity(-1)">-</button>
+                            <input type="number" 
+                                   class="quantity-input" 
+                                   id="quantityInput" 
+                                   value="1" 
+                                   min="{{ food.min_order }}" 
+                                   max="{{ food.max_order }}">
+                            <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопки действий -->
+                    <div class="action-buttons">
+                        <button class="btn-add-cart" onclick="addToCart('{{ food.id }}')">
+                            🛒 Добавить в корзину
+                        </button>
+                        <button class="btn-buy-now" onclick="buyNow('{{ food.id }}')">
+                            Купить сейчас
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Преимущества -->
+                <ul class="benefits-list">
+                    <li>Натуральные ингредиенты</li>
+                    <li>Оптимальный состав для лошадей</li>
+                    <li>Быстрая доставка</li>
+                    <li>Гарантия качества</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Похожие товары -->
+        {% if similar_items %}
+        <div class="similar-products">
+            <h3 class="similar-title">Похожие товары</h3>
+            <div class="similar-grid">
+                {% for item in similar_items %}
+                {% include 'food/partials/food_card.html' with food=item %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function changeImage(imageUrl) {
+        const mainImage = document.getElementById('currentImage');
+        if (mainImage) {
+            mainImage.src = imageUrl;
+        }
+        
+        // Обновляем активные миниатюры
+        document.querySelectorAll('.thumbnail').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        event.target.closest('.thumbnail').classList.add('active');
+    }
+    
+    function changeQuantity(delta) {
+        const input = document.getElementById('quantityInput');
+        let value = parseInt(input.value) + delta;
+        
+        const min = parseInt(input.min) || 1;
+        const max = parseInt(input.max) || 100;
+        
+        if (value < min) value = min;
+        if (value > max) value = max;
+        
+        input.value = value;
+    }
+    
+    function addToCart(foodId) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        {% if not user.is_authenticated %}
+        showAuthModal('login');
+        return;
+        {% endif %}
+        
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('/cart/api/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                food_id: foodId,
+                quantity: parseInt(quantity)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Товар добавлен в корзину!', 'success');
+                updateCartCount();
+            } else {
+                showNotification(data.message || 'Ошибка добавления', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showNotification('Ошибка сети', 'error');
+        });
+    }
+    
+    function buyNow(foodId) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        {% if not user.is_authenticated %}
+        showAuthModal('login');
+        return;
+        {% endif %}
+        
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // Сначала добавляем в корзину
+        fetch('/cart/api/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                food_id: foodId,
+                quantity: parseInt(quantity)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Затем переходим в корзину
+                window.location.href = '{% url 'cart_detail' %}';
+            } else {
+                showNotification(data.message || 'Ошибка', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showNotification('Ошибка сети', 'error');
+        });
+    }
+    
+    function showNotification(message, type = 'success') {
+        // Аналогично функции из food.html
+    }
+    
+    function updateCartCount() {
+        // Аналогично функции из food.html
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+<!-- Товары в корзине -->
+<div class="cart-items-section">
+    <h3 class="cart-title">Ваши товары</h3>
+    
+    {% if cart_items %}
+    <div class="cart-items-list">
+        {% for item in cart_items %}
+        <div class="cart-item" data-item-id="{{ item.id }}">
+            <div class="cart-item-image">
+                {% if item.food.image %}
+                <img src="{{ item.food.image.url }}" alt="{{ item.food.name }}">
+                {% else %}
+                <div class="no-image">🛒</div>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item-info">
+                <h4 class="item-name">{{ item.food.name }}</h4>
+                <p class="item-category">{{ item.food.category.name }}</p>
+                {% if item.food.description %}
+                <p class="item-desc">{{ item.food.description|truncatechars:100 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item-price">
+                <span class="price-current">{{ item.price_at_addition }} ₽</span>
+                {% if item.food.original_price > item.food.current_price %}
+                <span class="price-original">{{ item.food.original_price }} ₽</span>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item-quantity">
+                <button class="quantity-btn minus" data-action="decrease">−</button>
+                <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" max="99">
+                <button class="quantity-btn plus" data-action="increase">+</button>
+            </div>
+            
+            <div class="cart-item-total">
+                <span class="total-price">{{ item.total_price }} ₽</span>
+            </div>
+            
+            <div class="cart-item-remove">
+                <button class="remove-btn" data-action="remove" title="Удалить">×</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="cart-empty-message" style="display: none;">
+        <div class="empty-cart">
+            <h3>Ваша корзина пуста</h3>
+            <p>Добавьте товары из магазина кормов</p>
+            <a href="{% url 'food_list' %}" class="btn-upgrade premium">🛒 Перейти в магазин</a>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="empty-cart">
+        <h3>Ваша корзина пуста</h3>
+        <p>Добавьте товары из магазина кормов</p>
+        <a href="{% url 'food_list' %}" class="btn-upgrade premium">🛒 Перейти в магазин</a>
+    </div>
+    {% endif %}
+</div>

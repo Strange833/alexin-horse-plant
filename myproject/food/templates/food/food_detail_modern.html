@@ -1,0 +1,1103 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ food.name }} - Алексинский конный завод{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Основные стили */
+    :root {
+        --primary: #2d5016;
+        --primary-light: #4a7c2a;
+        --secondary: #3498db;
+        --accent: #e67e22;
+        --success: #27ae60;
+        --danger: #e74c3c;
+        --warning: #f39c12;
+        --light: #f8f9fa;
+        --dark: #2c3e50;
+        --gray: #95a5a6;
+        --border: #e0e0e0;
+        --shadow: rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Хлебные крошки */
+    .breadcrumb {
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-size: 0.95rem;
+        color: var(--gray);
+    }
+    
+    .breadcrumb a {
+        color: var(--secondary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .breadcrumb a:hover {
+        color: var(--primary);
+    }
+    
+    .breadcrumb-separator {
+        color: var(--gray);
+    }
+    
+    .breadcrumb-current {
+        color: var(--dark);
+        font-weight: 600;
+    }
+    
+    /* Основной контейнер */
+    .product-container {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 3rem;
+        margin-bottom: 4rem;
+    }
+    
+    @media (max-width: 992px) {
+        .product-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+    
+    /* Левая колонка - изображения */
+    .product-gallery {
+        position: relative;
+    }
+    
+    .main-image-container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f7fa, #e4e8f0);
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 30px rgba(45, 80, 22, 0.1);
+    }
+    
+    .main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 2rem;
+        transition: transform 0.5s ease;
+    }
+    
+    .main-image:hover {
+        transform: scale(1.02);
+    }
+    
+    .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: var(--primary-light);
+        background: linear-gradient(135deg, #f0f9e8, #e8f5e9);
+    }
+    
+    .image-placeholder span {
+        font-size: 1rem;
+        margin-top: 1rem;
+        color: var(--gray);
+    }
+    
+    .image-badges {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 2;
+    }
+    
+    .image-badge {
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        animation: badgePulse 2s infinite;
+    }
+    
+    @keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .badge-new {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+    
+    .badge-hit {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+    }
+    
+    .badge-discount {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+    }
+    
+    .thumbnails {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding: 1rem 0;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        background: var(--light);
+    }
+    
+    .thumbnail:hover {
+        border-color: var(--primary-light);
+        transform: translateY(-3px);
+    }
+    
+    .thumbnail.active {
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(45, 80, 22, 0.2);
+    }
+    
+    /* Правая колонка - информация */
+    .product-info {
+        padding: 1rem;
+    }
+    
+    .product-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .product-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, rgba(74, 124, 42, 0.1), rgba(45, 80, 22, 0.05));
+        color: var(--primary);
+        padding: 0.6rem 1.2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .product-title {
+        font-size: 2.2rem;
+        color: var(--dark);
+        margin-bottom: 1rem;
+        line-height: 1.2;
+        font-weight: 700;
+    }
+    
+    .product-subtitle {
+        color: var(--gray);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.4;
+    }
+    
+    .product-rating {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .rating-stars {
+        display: flex;
+        gap: 2px;
+        font-size: 1.3rem;
+        color: #f39c12;
+    }
+    
+    .rating-value {
+        font-weight: 700;
+        color: var(--dark);
+    }
+    
+    .rating-count {
+        color: var(--gray);
+        font-size: 0.95rem;
+    }
+    
+    /* Цена и акции */
+    .price-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .price-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+    
+    .current-price {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    .original-price {
+        font-size: 1.5rem;
+        color: var(--gray);
+        text-decoration: line-through;
+        margin-bottom: 1rem;
+    }
+    
+    .price-savings {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stock-status {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .stock-in {
+        background: rgba(39, 174, 96, 0.1);
+        color: var(--success);
+        border-left: 4px solid var(--success);
+    }
+    
+    .stock-low {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning);
+        border-left: 4px solid var(--warning);
+    }
+    
+    .stock-out {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger);
+        border-left: 4px solid var(--danger);
+    }
+    
+    /* Управление количеством */
+    .quantity-section {
+        margin-bottom: 2rem;
+    }
+    
+    .quantity-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.8rem;
+    }
+    
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        width: fit-content;
+    }
+    
+    .quantity-btn {
+        width: 50px;
+        height: 50px;
+        background: var(--light);
+        color: var(--dark);
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .quantity-btn:hover {
+        background: var(--primary-light);
+        color: white;
+    }
+    
+    .quantity-input {
+        width: 70px;
+        height: 50px;
+        border: none;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        background: white;
+    }
+    
+    /* Кнопки действий */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: 1.2rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        text-decoration: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(45, 80, 22, 0.2);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: var(--primary);
+        border: 2px solid var(--primary-light);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(74, 124, 42, 0.05);
+        transform: translateY(-3px);
+    }
+    
+    /* Характеристики */
+    .specs-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px var(--shadow);
+    }
+    
+    .specs-title {
+        font-size: 1.5rem;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    @media (max-width: 576px) {
+        .specs-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .spec-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .spec-label {
+        font-size: 0.9rem;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .spec-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    /* Преимущества */
+    .benefits-section {
+        background: linear-gradient(135deg, #f0f9e8, #e8f5e9);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .benefits-title {
+        font-size: 1.5rem;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+    }
+    
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .benefit-icon {
+        font-size: 1.5rem;
+        color: var(--primary-light);
+        margin-top: 0.2rem;
+    }
+    
+    .benefit-content h4 {
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .benefit-content p {
+        color: var(--gray);
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    /* Похожие товары */
+    .similar-section {
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 2px solid var(--border);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        color: var(--primary);
+        margin: 0;
+    }
+    
+    .similar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .product-title {
+            font-size: 1.8rem;
+        }
+        
+        .current-price {
+            font-size: 2.5rem;
+        }
+        
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .similar-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 1rem;">
+    <!-- Хлебные крошки -->
+    <div class="breadcrumb">
+        <a href="{% url 'index' %}">
+            <span>🏠</span>
+            <span>Главная</span>
+        </a>
+        <span class="breadcrumb-separator">›</span>
+        <a href="{% url 'food_list' %}">
+            <span>🥕</span>
+            <span>Магазин кормов</span>
+        </a>
+        {% if food.category %}
+        <span class="breadcrumb-separator">›</span>
+        <a href="{% url 'food_list' %}?category={{ food.category.id }}">
+            <span>{{ food.category.icon }}</span>
+            <span>{{ food.category.name }}</span>
+        </a>
+        {% endif %}
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-current">{{ food.name|truncatechars:30 }}</span>
+    </div>
+    
+    <!-- Основной контейнер -->
+    <div class="product-container">
+        <!-- Левая колонка: Изображения -->
+        <div class="product-gallery">
+            <!-- Бейджи -->
+            <div class="image-badges">
+                {% if food.is_new %}
+                <div class="image-badge badge-new">Новинка</div>
+                {% endif %}
+                
+                {% if food.is_best_seller %}
+                <div class="image-badge badge-hit">Хит продаж</div>
+                {% endif %}
+                
+                {% if food.get_discount_percentage > 0 %}
+                <div class="image-badge badge-discount">-{{ food.get_discount_percentage }}%</div>
+                {% endif %}
+            </div>
+            
+            <!-- Основное изображение -->
+            <div class="main-image-container">
+                {% if food.image %}
+                <img src="{{ food.image.url }}" alt="{{ food.name }}" class="main-image" id="mainImage">
+                {% else %}
+                <div class="image-placeholder">
+                    <span>🥕</span>
+                    <span>Изображение корма</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Миниатюры -->
+            <div class="thumbnails">
+                {% if food.image %}
+                <div class="thumbnail active" onclick="changeImage('{{ food.image.url }}')">
+                    <img src="{{ food.image.url }}" alt="{{ food.name }}">
+                </div>
+                {% endif %}
+                <!-- Дополнительные миниатюры можно добавить здесь -->
+            </div>
+        </div>
+        
+        <!-- Правая колонка: Информация -->
+        <div class="product-info">
+            <!-- Заголовок -->
+            <div class="product-header">
+                <div class="product-category">
+                    <span>{{ food.category.icon|default:"🥕" }}</span>
+                    <span>{{ food.category.name|default:"Корма" }}</span>
+                </div>
+                
+                <h1 class="product-title">{{ food.name }}</h1>
+                <p class="product-subtitle">{{ food.short_description|default:"Высококачественный корм для вашей лошади" }}</p>
+                
+                <!-- Рейтинг -->
+                {% if food.rating > 0 %}
+                <div class="product-rating">
+                    <div class="rating-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= food.rating|add:"0.5"|floatformat:0|add:"0" %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="rating-value">{{ food.rating|floatformat:1 }}</span>
+                    <span class="rating-count">({{ food.review_count }} отзывов)</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Цена и акции -->
+            <div class="price-section">
+                {% if food.get_discount_percentage > 0 %}
+                <div class="price-savings">
+                    <span>🔥</span>
+                    <span>Экономия {{ food.get_discount_percentage }}%</span>
+                </div>
+                {% endif %}
+                
+                <div class="current-price" id="currentPrice">
+                    {% if user.is_authenticated and user_profile %}
+                        {{ user_price|floatformat:0 }} ₽
+                    {% else %}
+                        {{ food.base_price|floatformat:0 }} ₽
+                    {% endif %}
+                </div>
+                
+                {% if food.get_discount_percentage > 0 %}
+                <div class="original-price">{{ food.base_price|floatformat:0 }} ₽</div>
+                {% endif %}
+                
+                <!-- Наличие -->
+                <div class="stock-status {% if food.is_in_stock %}{% if food.is_low_stock %}stock-low{% else %}stock-in{% endif %}{% else %}stock-out{% endif %}">
+                    <span>
+                        {% if food.is_in_stock %}
+                            {% if food.is_low_stock %}
+                                ⚠️ Осталось мало: {{ food.stock }} шт.
+                            {% else %}
+                                ✅ В наличии
+                            {% endif %}
+                        {% else %}
+                            ❌ Нет в наличии
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <!-- Управление количеством -->
+                <div class="quantity-section">
+                    <div class="quantity-label">Количество:</div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="changeQuantity(-1)">−</button>
+                        <input type="number" 
+                               class="quantity-input" 
+                               id="quantityInput" 
+                               value="1" 
+                               min="{{ food.min_order }}" 
+                               max="{{ food.max_order }}">
+                        <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+                    </div>
+                </div>
+                
+                <!-- Кнопки действий -->
+                <div class="action-buttons">
+                    {% if food.is_in_stock %}
+                    <button class="btn-primary" onclick="addToCart('{{ food.id }}')">
+                        <span>🛒</span>
+                        <span>Добавить в корзину</span>
+                    </button>
+                    
+                    <button class="btn-secondary" onclick="buyNow('{{ food.id }}')">
+                        <span>⚡</span>
+                        <span>Купить сейчас</span>
+                    </button>
+                    {% else %}
+                    <button class="btn-secondary" disabled style="opacity: 0.6;">
+                        <span>⏳</span>
+                        <span>Скоро в наличии</span>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Характеристики -->
+            <div class="specs-section">
+                <h3 class="specs-title">📊 Характеристики</h3>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <span class="spec-label">
+                            <span>⚖️</span>
+                            <span>Вес/объем</span>
+                        </span>
+                        <span class="spec-value">{{ food.weight }} {{ food.get_unit_display }}</span>
+                    </div>
+                    
+                    <div class="spec-item">
+                        <span class="spec-label">
+                            <span>🔥</span>
+                            <span>Калорийность</span>
+                        </span>
+                        <span class="spec-value">{{ food.calories }} ккал/100г</span>
+                    </div>
+                    
+                    <div class="spec-item">
+                        <span class="spec-label">
+                            <span>💪</span>
+                            <span>Белки</span>
+                        </span>
+                        <span class="spec-value">{{ food.protein }}%</span>
+                    </div>
+                    
+                    <div class="spec-item">
+                        <span class="spec-label">
+                            <span>⚡</span>
+                            <span>Жиры</span>
+                        </span>
+                        <span class="spec-value">{{ food.fat }}%</span>
+                    </div>
+                    
+                    <div class="spec-item">
+                        <span class="spec-label">
+                            <span>🌾</span>
+                            <span>Клетчатка</span>
+                        </span>
+                        <span class="spec-value">{{ food.fiber }}%</span>
+                    </div>
+                    
+                    <div class="spec-item">
+                        <span class="spec-label">
+                            <span>📦</span>
+                            <span>Минимальный заказ</span>
+                        </span>
+                        <span class="spec-value">{{ food.min_order }} шт.</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Преимущества -->
+            <div class="benefits-section">
+                <h3 class="benefits-title">🌟 Преимущества этого корма</h3>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <span class="benefit-icon">✅</span>
+                        <div class="benefit-content">
+                            <h4>Натуральный состав</h4>
+                            <p>Только натуральные ингредиенты без искусственных добавок</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <span class="benefit-icon">✅</span>
+                        <div class="benefit-content">
+                            <h4>Сбалансированный рацион</h4>
+                            <p>Оптимальное соотношение белков, жиров и углеводов</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <span class="benefit-icon">✅</span>
+                        <div class="benefit-content">
+                            <h4>Для здоровья лошади</h4>
+                            <p>Поддерживает пищеварение, иммунитет и общее состояние</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <span class="benefit-icon">✅</span>
+                        <div class="benefit-content">
+                            <h4>Гарантия качества</h4>
+                            <p>Сертифицированная продукция от проверенных поставщиков</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Описание -->
+    <div class="specs-section">
+        <h3 class="specs-title">📝 Подробное описание</h3>
+        <div style="color: #555; line-height: 1.6; font-size: 1.1rem;">
+            {{ food.description|linebreaks }}
+        </div>
+    </div>
+    
+    <!-- Похожие товары -->
+    {% if similar_items %}
+    <div class="similar-section">
+        <div class="section-header">
+            <h3 class="section-title">🎯 Похожие товары</h3>
+            <a href="{% url 'food_list' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">
+                Смотреть все →
+            </a>
+        </div>
+        
+        <div class="similar-grid">
+            {% for item in similar_items %}
+            <div class="simple-food-card" style="border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem;">
+                <div style="height: 150px; background: #f5f7fa; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: var(--primary-light);">
+                    🥕
+                </div>
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--dark);">{{ item.name|truncatechars:40 }}</h4>
+                <p style="color: var(--gray); margin-bottom: 1rem; font-size: 0.9rem;">{{ item.category.name|default:"Корма" }}</p>
+                <div style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem;">
+                    {{ item.get_display_price|floatformat:0 }} ₽
+                </div>
+                <a href="{% url 'food_detail' item.id %}" 
+                   style="display: inline-block; padding: 0.8rem 1.5rem; background: var(--primary-light); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; text-align: center;">
+                    Подробнее
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% csrf_token %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Функции для работы с изображениями
+    function changeImage(imageUrl) {
+        const mainImage = document.getElementById('mainImage');
+        if (mainImage) {
+            mainImage.src = imageUrl;
+        }
+        
+        // Обновляем активные миниатюры
+        document.querySelectorAll('.thumbnail').forEach(thumb => {
+            thumb.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+    }
+    
+    // Функции для управления количеством
+    function changeQuantity(delta) {
+        const input = document.getElementById('quantityInput');
+        let value = parseInt(input.value) + delta;
+        
+        const min = parseInt(input.min) || 1;
+        const max = parseInt(input.max) || 100;
+        
+        if (value < min) value = min;
+        if (value > max) value = max;
+        
+        input.value = value;
+    }
+    
+    // Функция добавления в корзину
+    function addToCart(foodId) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        {% if not user.is_authenticated %}
+        showNotification('Для добавления в корзину необходимо войти в систему', 'warning');
+        setTimeout(() => {
+            window.location.href = '{% url "login" %}';
+        }, 1500);
+        return;
+        {% endif %}
+        
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('/cart/api/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                food_id: foodId,
+                quantity: parseInt(quantity)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('✅ Товар добавлен в корзину!', 'success');
+                updateCartCount();
+            } else {
+                showNotification('❌ ' + (data.message || 'Ошибка добавления'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showNotification('❌ Ошибка сети', 'error');
+        });
+    }
+    
+    // Функция "Купить сейчас"
+    function buyNow(foodId) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        {% if not user.is_authenticated %}
+        showNotification('Для покупки необходимо войти в систему', 'warning');
+        setTimeout(() => {
+            window.location.href = '{% url "login" %}';
+        }, 1500);
+        return;
+        {% endif %}
+        
+        addToCart(foodId);
+        
+        // Переходим в корзину через 1.5 секунды
+        setTimeout(() => {
+            window.location.href = '{% url "cart" %}';
+        }, 1500);
+    }
+    
+    // Уведомления
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification-${type}`;
+        notification.innerHTML = `
+            <div style="position: fixed; top: 20px; right: 20px; background: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#f39c12'}; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000; display: flex; align-items: center; gap: 0.8rem; animation: slideIn 0.3s ease;">
+                <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    // Обновление счетчика корзины
+    function updateCartCount() {
+        fetch('/cart/api/data/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const cartCount = document.getElementById('cartCount');
+                    if (cartCount) {
+                        cartCount.textContent = data.total_items;
+                    }
+                }
+            });
+    }
+    
+    // Добавляем анимации для уведомлений
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+       function addToCart(foodId) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        {% if not user.is_authenticated %}
+        showNotification('Для добавления в корзину необходимо войти в систему', 'warning');
+        setTimeout(() => {
+            window.location.href = '{% url "login" %}';
+        }, 1500);
+        return;
+        {% endif %}
+        
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch('/cart/api/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                food_id: foodId,
+                quantity: parseInt(quantity)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('✅ Товар добавлен в корзину!', 'success');
+                updateCartCount();
+            } else {
+                showNotification('❌ ' + (data.message || 'Ошибка добавления'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showNotification('❌ Ошибка сети', 'error');
+        });
+    }
+    
+    // Функция "Купить сейчас"
+    function buyNow(foodId) {
+        const quantity = document.getElementById('quantityInput').value;
+        
+        {% if not user.is_authenticated %}
+        showNotification('Для покупки необходимо войти в систему', 'warning');
+        setTimeout(() => {
+            window.location.href = '{% url "login" %}';
+        }, 1500);
+        return;
+        {% endif %}
+        
+        // Сначала добавляем в корзину
+        addToCart(foodId);
+        
+        // Переходим в корзину через 1.5 секунды
+        setTimeout(() => {
+            window.location.href = '{% url "cart" %}';
+        }, 1500);
+    }
+    
+    // Обновление счетчика корзины
+    function updateCartCount() {
+        fetch('/cart/api/data/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const cartCount = document.getElementById('cartCount');
+                    if (cartCount) {
+                        cartCount.textContent = data.total_items;
+                    }
+                }
+            });
+    }
+    
+    // Уведомления
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#2ecc71' : type === 'error' ? '#e74c3c' : '#f39c12'};
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            animation: slideIn 0.3s ease;
+        `;
+        
+        notification.innerHTML = `
+            <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️'}</span>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

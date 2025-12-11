@@ -1,0 +1,115 @@
+<div class="food-card">
+    <!-- Бейджи -->
+    <div class="food-badges">
+        {% if food.is_new %}
+        <span class="food-badge badge-new">НОВИНКА</span>
+        {% endif %}
+        
+        {% if food.is_best_seller %}
+        <span class="food-badge badge-bestseller">ХИТ</span>
+        {% endif %}
+        
+        {% if food.is_featured %}
+        <span class="food-badge badge-featured">ВЫБОР</span>
+        {% endif %}
+        
+        {% if food.get_discount_percentage > 0 %}
+        <span class="food-badge badge-discount">-{{ food.get_discount_percentage }}%</span>
+        {% endif %}
+    </div>
+    
+    <!-- Изображение -->
+    <div class="food-image">
+        {% if food.image %}
+        <img src="{{ food.image.url }}" alt="{{ food.name }}" loading="lazy">
+        {% else %}
+        <div class="image-placeholder">🥕</div>
+        {% endif %}
+    </div>
+    
+    <!-- Информация -->
+    <div class="food-info">
+        <div class="food-category">
+            <span>{{ food.category.icon|default:"🥕" }}</span>
+            {{ food.category.name|default:"Корма" }}
+        </div>
+        
+        <h3 class="food-name">{{ food.name }}</h3>
+        
+        <p class="food-description">
+            {{ food.short_description|default:food.description|truncatechars:100 }}
+        </p>
+        
+        <div class="food-price-section">
+            <span class="food-price">
+                {% if user.is_authenticated and user_profile and user_profile.is_premium %}
+                    {{ food.get_price_for_user|floatformat:0 }} ₽
+                {% else %}
+                    {{ food.base_price|floatformat:0 }} ₽
+                {% endif %}
+            </span>
+            
+            {% if food.get_discount_percentage > 0 %}
+            <span class="original-price">{{ food.base_price|floatformat:0 }} ₽</span>
+            {% endif %}
+            
+            <span class="food-unit">{{ food.weight }} {{ food.get_unit_display }}</span>
+        </div>
+        
+        <!-- Рейтинг -->
+        {% if food.rating > 0 %}
+        <div class="food-rating">
+            <span class="rating-stars">
+                {% for i in "12345" %}
+                    {% if forloop.counter <= food.rating|add:"0.5"|floatformat:0|add:"0" %}
+                        ★
+                    {% else %}
+                        ☆
+                    {% endif %}
+                {% endfor %}
+            </span>
+            <span class="rating-count">({{ food.review_count }})</span>
+        </div>
+        {% endif %}
+        
+        <!-- Наличие -->
+        <div class="food-stock {% if food.is_in_stock %}{% if food.is_low_stock %}stock-low{% else %}stock-in{% endif %}{% else %}stock-out{% endif %}">
+            {% if food.is_in_stock %}
+                {% if food.is_low_stock %}
+                    ⚠️ Осталось мало
+                {% else %}
+                    ✅ В наличии
+                {% endif %}
+            {% else %}
+                ❌ Нет в наличии
+            {% endif %}
+        </div>
+        
+        <!-- Действия -->
+        <div class="food-actions">
+            <a href="{% url 'food_detail' food.id %}" class="btn-view">
+                Подробнее
+            </a>
+            
+            {% if food.is_in_stock %}
+            <button class="btn-add-cart" 
+                    onclick="addToCartFromCard('{{ food.id }}')"
+                    title="Добавить в корзину"
+                    {% if not user.is_authenticated %}disabled{% endif %}>
+                🛒
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if not user.is_authenticated %}
+<script>
+    function addToCartFromCard(foodId) {
+        // Если пользователь не авторизован, показываем модальное окно
+        alert('Для добавления в корзину необходимо войти в систему.');
+        // Или можно сделать редирект на страницу входа
+        // window.location.href = '{% url "login" %}';
+    }
+</script>
+{% endif %}
